@@ -1,0 +1,189 @@
+{
+	"name": "1 CREATE DATASOURCE TABLE",
+	"properties": {
+		"folder": {
+			"name": "Spark - Lake Database/Spark SQL"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "b1de840e-f523-4247-8370-79908b7a1132"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "python"
+			},
+			"language_info": {
+				"name": "sql"
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"Syntax\r\n",
+					"CREATE TABLE [ IF NOT EXISTS ] table_identifier\r\n",
+					"    [ ( col_name1 col_type1 [ COMMENT col_comment1 ], ... ) ]\r\n",
+					"    USING data_source\r\n",
+					"    [ OPTIONS ( key1=val1, key2=val2, ... ) ]\r\n",
+					"    [ PARTITIONED BY ( col_name1, col_name2, ... ) ]\r\n",
+					"    [ CLUSTERED BY ( col_name3, col_name4, ... ) \r\n",
+					"        [ SORTED BY ( col_name [ ASC | DESC ], ... ) ] \r\n",
+					"        INTO num_buckets BUCKETS ]\r\n",
+					"    [ LOCATION path ]\r\n",
+					"    [ COMMENT table_comment ]\r\n",
+					"    [ TBLPROPERTIES ( key1=val1, key2=val2, ... ) ]\r\n",
+					"    [ AS select_statement ]\r\n",
+					"\r\n",
+					"\r\n",
+					"\r\n",
+					"Parameters table_identifier\r\n",
+					"Specifies a table name, which may be optionally qualified with a database name.\r\n",
+					"Syntax: [ database_name.] table_name\r\n",
+					"\r\n",
+					"\r\n",
+					"USING data_source Data Source is the input format used to create the table. Data source can be CSV, TXT, ORC, JDBC, PARQUET, etc.\r\n",
+					"\r\n",
+					"OPTIONS Options of data source which will be injected to storage properties.\r\n",
+					"\r\n",
+					"PARTITIONED BY Partitions are created on the table, based on the columns specified.\r\n",
+					"\r\n",
+					"CLUSTERED BY Partitions created on the table will be bucketed into fixed buckets based on the column specified for bucketing. NOTE: Bucketing is an optimization technique that uses buckets (and bucketing columns) to determine data partitioning and avoid data shuffle.\r\n",
+					"\r\n",
+					"SORTED BY Specifies an ordering of bucket columns. Optionally, one can use ASC for an ascending order or DESC for a descending order after any column names in the SORTED BY clause. If not specified, ASC is assumed by default.\r\n",
+					"\r\n",
+					"INTO num_buckets BUCKETS Specifies buckets numbers, which is used in CLUSTERED BY clause.\r\n",
+					"\r\n",
+					"LOCATION Path to the directory where table data is stored, which could be a path on distributed storage like HDFS, etc.\r\n",
+					"\r\n",
+					"COMMENT A string literal to describe the table.\r\n",
+					"\r\n",
+					"TBLPROPERTIES A list of key-value pairs that is used to tag the table definition.\r\n",
+					"\r\n",
+					"AS select_statement The table is populated using the data from the select statement."
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"<mark></mark>#### CREATE DATASOURCE TABLE\r\n",
+					"\r\n",
+					"Description\r\n",
+					"The CREATE TABLE statement defines a new table using a Data Source.\r\n",
+					"\r\n",
+					"\r\n",
+					"Note that, the clauses between the USING clause and the AS SELECT clause can come in as any order. For example, you can write COMMENT table_comment after TBLPROPERTIES.\r\n",
+					"\r\n",
+					"\r\n",
+					"##### Data Source Interaction\r\n",
+					"\r\n",
+					"A Data Source table acts like a pointer to the underlying data source. For example, you can create a table “foo” in Spark which points to a table “bar” in MySQL using JDBC Data Source. When you read/write table “foo”, you actually read/write table “bar”.\r\n",
+					"\r\n",
+					"<u>In general CREATE TABLE is creating a <mark>“pointer”</mark>, and you need to make sure it points to something existing</u>. An exception is file source such as parquet, json. If you don’t specify the LOCATION, Spark will create a default table location for you.\r\n",
+					"\r\n",
+					"For CREATE TABLE AS SELECT, <u>Spark will overwrite the underlying data source with the data of the input query</u>, to make sure the table gets created contains exactly the same data as the input query.\r\n",
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"\r\n",
+					"--Examples\r\n",
+					"\r\n",
+					"--Use data source\r\n",
+					"CREATE TABLE student (id INT, name STRING, age INT) USING CSV;\r\n",
+					"\r\n",
+					"--Use data from another table\r\n",
+					"CREATE TABLE student_copy USING CSV\r\n",
+					"    AS SELECT * FROM student;\r\n",
+					"  \r\n",
+					"--Omit the USING clause, which uses the default data source (parquet by default)\r\n",
+					"CREATE TABLE student (id INT, name STRING, age INT);\r\n",
+					"\r\n",
+					"\r\n",
+					"\r\n",
+					"--Use parquet data source with parquet storage options\r\n",
+					"--The columns 'id' and 'name' enable the bloom filter during writing parquet file,\r\n",
+					"--column 'age' does not enable\r\n",
+					"CREATE TABLE student_parquet(id INT, name STRING, age INT) USING PARQUET\r\n",
+					"    OPTIONS (\r\n",
+					"      'parquet.bloom.filter.enabled'='true',\r\n",
+					"      'parquet.bloom.filter.enabled#age'='false'\r\n",
+					"    );\r\n",
+					"\r\n",
+					"\r\n",
+					"--Specify table comment and properties\r\n",
+					"CREATE TABLE student (id INT, name STRING, age INT) USING CSV\r\n",
+					"    COMMENT 'this is a comment'\r\n",
+					"    TBLPROPERTIES ('foo'='bar');\r\n",
+					"    \r\n",
+					"\r\n",
+					"--Specify table comment and properties with different clauses order\r\n",
+					"CREATE TABLE student (id INT, name STRING, age INT) USING CSV\r\n",
+					"    TBLPROPERTIES ('foo'='bar')\r\n",
+					"    COMMENT 'this is a comment';\r\n",
+					"\r\n",
+					"--Create partitioned and bucketed table\r\n",
+					"CREATE TABLE student (id INT, name STRING, age INT)\r\n",
+					"    USING CSV\r\n",
+					"    PARTITIONED BY (age)\r\n",
+					"    CLUSTERED BY (Id) INTO 4 buckets;\r\n",
+					"\r\n",
+					"--Create partitioned and bucketed table through CTAS\r\n",
+					"CREATE TABLE student_partition_bucket\r\n",
+					"    USING parquet\r\n",
+					"    PARTITIONED BY (age)\r\n",
+					"    CLUSTERED BY (id) INTO 4 buckets\r\n",
+					"    AS SELECT * FROM student;\r\n",
+					"\r\n",
+					"--Create bucketed table through CTAS and CTE\r\n",
+					"CREATE TABLE student_bucket\r\n",
+					"    USING parquet\r\n",
+					"    CLUSTERED BY (id) INTO 4 buckets (\r\n",
+					"    WITH tmpTable AS (\r\n",
+					"        SELECT * FROM student WHERE id > 100\r\n",
+					"    )\r\n",
+					"    SELECT * FROM tmpTable\r\n",
+					");"
+				]
+			}
+		]
+	}
+}

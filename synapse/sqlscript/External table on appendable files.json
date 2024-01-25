@@ -1,0 +1,20 @@
+{
+	"name": "External table on appendable files",
+	"properties": {
+		"folder": {
+			"name": "Synapse SQL/Serverless SQL Pools"
+		},
+		"content": {
+			"query": "\n/*\nExternal table on appendable files\n***********************************\n*************************************\nThe files that are referenced by an external table should not be changed while the query is running. \nIn the long-running query, SQL pool may retry reads, read parts of the files, or even read the file \nmultiple times. Changes of the file content would cause wrong results. Therefore, the SQL pool \nfails the query if detects that the modification time of any file is changed during the query \nexecution. In some scenarios you might want to create a table on the files that are constantly \nappended. To avoid the query failures due to constantly appended files, you can specify that \nthe external table should ignore potentially inconsistent reads using the TABLE_OPTIONS setting.\n*/\n\n\nCREATE EXTERNAL TABLE populationExternalTable\n(\n    [country_code] VARCHAR (5) COLLATE Latin1_General_BIN2,\n    [country_name] VARCHAR (100) COLLATE Latin1_General_BIN2,\n    [year] smallint,\n    [population] bigint\n)\nWITH (\n    LOCATION = 'csv/population/population.csv',\n    DATA_SOURCE = sqlondemanddemo,\n    FILE_FORMAT = QuotedCSVWithHeaderFormat,\n    TABLE_OPTIONS = N'{\"READ_OPTIONS\":[\"ALLOW_INCONSISTENT_READS\"]}'\n);\n\n/*\nThe ALLOW_INCONSISTENT_READS read option will disable file modification time check during the \nquery lifecycle and read whatever is available in the files that are referenced by the external table. \nIn appendable files, the existing content is not updated, and only new rows are added. \nTherefore, the probability of wrong results is minimized compared to the updateable files. \nThis option might enable you to read the frequently appended files without handling the errors.\n\n Note\nThis option is available only in the external tables created on CSV file format.\nAs the option name implies, the creator of the table accepts a risk that the results might not\n be consistent. In the appendable files, you might get incorrect results if you force multiple read\n  of the underlying files by self-joining the table. In most of the \"classic\" queries, \n  the external table will just ignore some rows that are appended while the query was running.\n*/\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

@@ -1,0 +1,125 @@
+{
+	"name": "SparkPool_SQL",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "TestSparkPool",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "3121ba76-211f-4107-9af1-e22d3cb81044"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "python"
+			},
+			"language_info": {
+				"name": "sql"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/53b2e7eb-9e0b-45c0-8fa3-b6279c1b186e/resourceGroups/msdnCertification/providers/Microsoft.Synapse/workspaces/msdncertsynapsewrkspace/bigDataPools/TestSparkPool",
+				"name": "TestSparkPool",
+				"type": "Spark",
+				"endpoint": "https://msdncertsynapsewrkspace.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/TestSparkPool",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.3",
+				"nodeCount": 3,
+				"cores": 4,
+				"memory": 28,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"-- Create Delta Table in Severless Spark Pool\r\n",
+					"\r\n",
+					"CREATE TABLE delta_salesorder\r\n",
+					"USING delta\r\n",
+					"PARTITIONED BY (OrderDatePartition)\r\n",
+					"LOCATION 'abfss://container@storage.dfs.core.windows.net/spark/deltalake/salesorder'\r\n",
+					"AS SELECT OrderID,\r\n",
+					"          CustomerID,\r\n",
+					"          SalespersonPersonID,\r\n",
+					"          PickedByPersonID,\r\n",
+					"          ContactPersonID,\r\n",
+					"          BackorderOrderID,\r\n",
+					"          CAST(OrderDate AS DATE) AS OrderDatePartition,\r\n",
+					"          CAST(OrderDate AS DATE) AS OrderDate\r\n",
+					"FROM raw_salesorder"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"-- Create parquet Table in Severless Spark Pool\r\n",
+					"CREATE TABLE raw_salesorder\r\n",
+					"USING parquet\r\n",
+					"PARTITIONED BY (OrderDatePartition)\r\n",
+					"LOCATION 'abfss://container@storage.dfs.core.windows.net/spark/deltalake/salesorder'\r\n",
+					"AS SELECT OrderID,\r\n",
+					"          CustomerID,\r\n",
+					"          SalespersonPersonID,\r\n",
+					"          PickedByPersonID,\r\n",
+					"          ContactPersonID,\r\n",
+					"          BackorderOrderID,\r\n",
+					"          CAST(OrderDate AS DATE) AS OrderDatePartition,\r\n",
+					"          CAST(OrderDate AS DATE) AS OrderDate\r\n",
+					"FROM raw_salesorder"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					""
+				]
+			}
+		]
+	}
+}

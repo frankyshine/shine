@@ -1,0 +1,25 @@
+{
+	"name": "Database2",
+	"properties": {
+		"Name": "Database2",
+		"EntityType": "DATABASE",
+		"Origin": {
+			"Type": "SPARK"
+		},
+		"Properties": {
+			"IsSyMSCDMDatabase": true
+		},
+		"Source": {
+			"Provider": "ADLS",
+			"Location": "abfss://adlsflsys@adlsgen2msdncert.dfs.core.windows.net/Database2",
+			"Properties": {
+				"FormatType": "parquet",
+				"LinkedServiceName": "msdncertsynapsewrkspace-WorkspaceDefaultStorage"
+			}
+		},
+		"PublishStatus": "PUBLISHED",
+		"ObjectVersion": 4,
+		"ObjectId": "af3b0877-9752-40da-86b4-54d42b7b0ea6"
+	},
+	"type": "DATABASE"
+}

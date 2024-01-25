@@ -1,0 +1,20 @@
+{
+	"name": "Querying Spark Tables with Serverless",
+	"properties": {
+		"folder": {
+			"name": "Synapse SQL/Serverless SQL Pools"
+		},
+		"content": {
+			"query": "\n\nCreating Tables using Spark and Querying with Serverless\n*********************************************************\nThere is the concept of shared metadata between Serverless SQL Pools and Spark Pools which allows querying a \ntable created in Spark but using the Serverless engine without needing an active Spark Pool running. We can \ncreate external tables in a Spark database and then use those tables in Serverless SQL Pools to read data. \nA simple process would be to create the table in Spark (e.g. using Spark SQL) and then shut the Spark cluster \ndown and use the table in Serverless SQL Pools. We can do this for both Delta format tables and regular external\n tables in Spark. Data can be added to the underlying data source and this would be reflected when querying using Serverless.\n\nCreate Table in Spark SQL\n---------------------------------\nThe following Spark SQL code can be run in a Notebook attached to a Spark Pool. Once the table has been created, \nthe Spark pool can be terminated (or can be left to pause itself depending on the timeout setting). This is the \nsame Spark SQL code seen earlier except we are now using parquet rather than delta, however the process and outcome are the same.\n\n\nCREATE TABLE raw_salesorder\nUSING parquet\nPARTITIONED BY (OrderDatePartition)\nLOCATION 'abfss://container@storage.dfs.core.windows.net/spark/deltalake/salesorder'\nAS SELECT OrderID,\n          CustomerID,\n          SalespersonPersonID,\n          PickedByPersonID,\n          ContactPersonID,\n          BackorderOrderID,\n          CAST(OrderDate AS DATE) AS OrderDatePartition,\n          CAST(OrderDate AS DATE) AS OrderDate\nFROM raw_salesorder\n\n\nQuery Table using Serverless SQL Pools\n---------------------------------------\nWe will use 2 queries used in the Views over Delta Lake section to query the external table created in Spark but we are \nusing the Serverless SQL Pools engine to query. We will see that when using the OrderDatePartition column in the WHERE \nclause it partition prunes successfully, as indicated in the MS documentation.\n\n--Baseline query which shows 57MB data processed\nSELECT CustomerID,\nCOUNT(*) AS SalesOrderCount\nFROM sparkdatabase.dbo.delta_salesorder\nGROUP BY CustomerID\n\n--Filter using the partition schema column we see 1MB data processed (this will be rounded up to 10MB minimum however)\nSELECT CustomerID,\nCOUNT(*) AS SalesOrderCount\nFROM sparkdatabase.dbo.raw_salesorder\nWHERE OrderDatePartition = '2016-06-03'\nGROUP BY CustomerID",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

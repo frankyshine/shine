@@ -1,0 +1,212 @@
+{
+	"name": "AirportTerminal",
+	"properties": {
+		"Name": "AirportTerminal",
+		"EntityType": "TABLE",
+		"TableType": "EXTERNAL",
+		"Namespace": {
+			"SchemaName": null,
+			"DatabaseName": "Database1",
+			"DatabaseId": null
+		},
+		"StorageDescriptor": {
+			"Distribution": null,
+			"Columns": [
+				{
+					"Name": "AirportTerminalId",
+					"Description": "The unique identifier of an Airport Terminal.",
+					"OriginDataTypeName": {
+						"TypeName": "integer",
+						"IsComplexType": false,
+						"IsNullable": false,
+						"Length": 0,
+						"Precision": 0,
+						"Scale": 0,
+						"Properties": {
+							"HIVE_TYPE_STRING": "integer"
+						}
+					},
+					"BaseAttributeReference": {
+						"Entity": "AirportTerminal.cdm.json/AirportTerminal",
+						"Name": "AirportTerminalId"
+					}
+				},
+				{
+					"Name": "AirportTerminalName",
+					"Description": "The business name by which the Airport Terminal is known.\n\nEx:  \"JFK Terminal #2\"",
+					"OriginDataTypeName": {
+						"TypeName": "string",
+						"IsComplexType": false,
+						"IsNullable": true,
+						"Length": 256,
+						"Precision": 0,
+						"Scale": 0,
+						"Properties": {
+							"HIVE_TYPE_STRING": "string"
+						}
+					},
+					"BaseAttributeReference": {
+						"Entity": "AirportTerminal.cdm.json/AirportTerminal",
+						"Name": "AirportTerminalName"
+					}
+				},
+				{
+					"Name": "AirportId",
+					"Description": "The unique identifier of an Airport.",
+					"OriginDataTypeName": {
+						"TypeName": "integer",
+						"IsComplexType": false,
+						"IsNullable": true,
+						"Length": 0,
+						"Precision": 0,
+						"Scale": 0,
+						"Properties": {
+							"HIVE_TYPE_STRING": "integer"
+						}
+					},
+					"BaseAttributeReference": {
+						"Entity": "AirportTerminal.cdm.json/AirportTerminal",
+						"Name": "AirportId"
+					}
+				},
+				{
+					"Name": "LocationGpsLongitudePosition",
+					"Description": "The location GPS position expressed in longitude.\n\nEx:\n\nGPS Coordinates (Ex= 39deg 58.589min) - seconds are converted to decimal format.",
+					"OriginDataTypeName": {
+						"TypeName": "decimal",
+						"IsComplexType": false,
+						"IsNullable": false,
+						"Length": 0,
+						"Precision": 10,
+						"Scale": 7,
+						"Properties": {
+							"HIVE_TYPE_STRING": "decimal"
+						}
+					},
+					"BaseAttributeReference": {
+						"Entity": "AirportTerminal.cdm.json/AirportTerminal",
+						"Name": "LocationGpsLongitudePosition"
+					}
+				},
+				{
+					"Name": "LocationGpsLatitudePosition",
+					"Description": "The location GPS position expressed in latitude.\n\nEx:\n\nGPS Coordinates (Ex= 39deg 58.589min) - seconds are converted to decimal format.",
+					"OriginDataTypeName": {
+						"TypeName": "decimal",
+						"IsComplexType": false,
+						"IsNullable": false,
+						"Length": 0,
+						"Precision": 10,
+						"Scale": 7,
+						"Properties": {
+							"HIVE_TYPE_STRING": "decimal"
+						}
+					},
+					"BaseAttributeReference": {
+						"Entity": "AirportTerminal.cdm.json/AirportTerminal",
+						"Name": "LocationGpsLatitudePosition"
+					}
+				},
+				{
+					"Name": "SecurityLevelId",
+					"Description": "The unique identifier of the Security Level.",
+					"OriginDataTypeName": {
+						"TypeName": "integer",
+						"IsComplexType": false,
+						"IsNullable": true,
+						"Length": 0,
+						"Precision": 0,
+						"Scale": 0,
+						"Properties": {
+							"HIVE_TYPE_STRING": "integer"
+						}
+					},
+					"BaseAttributeReference": {
+						"Entity": "AirportTerminal.cdm.json/AirportTerminal",
+						"Name": "SecurityLevelId"
+					}
+				},
+				{
+					"Name": "AirportTerminalConfigurationTypeId",
+					"Description": "The unique identifier of the Airport Terminal Configuration Type.",
+					"OriginDataTypeName": {
+						"TypeName": "integer",
+						"IsComplexType": false,
+						"IsNullable": true,
+						"Length": 0,
+						"Precision": 0,
+						"Scale": 0,
+						"Properties": {
+							"HIVE_TYPE_STRING": "integer"
+						}
+					},
+					"BaseAttributeReference": {
+						"Entity": "AirportTerminal.cdm.json/AirportTerminal",
+						"Name": "AirportTerminalConfigurationTypeId"
+					}
+				}
+			],
+			"ColumnSetEntityName": "ca1d77e9-49d8-4756-9f8c-299a740b77d4",
+			"Format": {
+				"InputFormat": "org.apache.hadoop.mapred.SequenceFileInputFormat",
+				"OutputFormat": "org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat",
+				"FormatType": "csv",
+				"SerializeLib": "org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe",
+				"Properties": {
+					"path": "abfss://adlsflsys@adlsgen2msdncert.dfs.core.windows.net/Database1/AirportTerminal",
+					"delimiter": ",",
+					"firstRowAsHeader": "false",
+					"multiLine": "false",
+					"serialization.format": "1",
+					"escape": "\\",
+					"quote": "\"",
+					"FormatTypeSetToDatabaseDefault": true,
+					"header": "false"
+				}
+			},
+			"Source": {
+				"Provider": "ADLS",
+				"Location": "abfss://adlsflsys@adlsgen2msdncert.dfs.core.windows.net/Database1/AirportTerminal",
+				"Properties": {
+					"LinkedServiceName": "msdncertsynapsewrkspace-WorkspaceDefaultStorage",
+					"LocationSetToDatabaseDefault": true
+				}
+			},
+			"Properties": {
+				"textinputformat.record.delimiter": ",",
+				"compression": "{\"type\":\"None\",\"level\":\"optimal\"}",
+				"derivedModelAttributeInfo": "{\"attributeReferences\":{\"AirportTerminalId\":{\"entity\":\"AirportTerminal.cdm.json/AirportTerminal\",\"name\":\"AirportTerminalId\"},\"AirportTerminalName\":{\"entity\":\"AirportTerminal.cdm.json/AirportTerminal\",\"name\":\"AirportTerminalName\"},\"AirportId\":{\"entity\":\"AirportTerminal.cdm.json/AirportTerminal\",\"name\":\"AirportId\"},\"LocationGpsLongitudePosition\":{\"entity\":\"AirportTerminal.cdm.json/AirportTerminal\",\"name\":\"LocationGpsLongitudePosition\"},\"LocationGpsLatitudePosition\":{\"entity\":\"AirportTerminal.cdm.json/AirportTerminal\",\"name\":\"LocationGpsLatitudePosition\"},\"SecurityLevelId\":{\"entity\":\"AirportTerminal.cdm.json/AirportTerminal\",\"name\":\"SecurityLevelId\"},\"AirportTerminalConfigurationTypeId\":{\"entity\":\"AirportTerminal.cdm.json/AirportTerminal\",\"name\":\"AirportTerminalConfigurationTypeId\"}}}"
+			},
+			"Compressed": false,
+			"SerDeInfo": null,
+			"IsStoredAsSubdirectories": false
+		},
+		"Owner": null,
+		"CreateTime": 0,
+		"LastAccessTime": 0,
+		"Retention": 0,
+		"Temporary": false,
+		"IsRewriteEnabled": false,
+		"ViewOriginalText": null,
+		"ViewExpandedText": null,
+		"Origin": {
+			"Type": "SPARK"
+		},
+		"OriginObjectId": null,
+		"IsSharedEntity": false,
+		"PublishStatus": "PUBLISHED",
+		"Properties": {
+			"DerivedModelEntityInfo": "{\"entityDirectives\":{\"baseEntityReference\":{\"name\":\"AirportTerminal\",\"path\":\"AirportTerminal.cdm.json/AirportTerminal\"},\"description\":\"A building at an airport where passengers transfer between different forms of transportation and the facilities that allow them to board and disembark from aircraft.\",\"primaryKey\":[\"AirportTerminalId\"],\"projectionInfo\":{\"attributes\":[{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"AirportTerminal.cdm.json/AirportTerminal\",\"name\":\"AirportTerminalId\"},\"dataType\":\"integer\",\"description\":\"The unique identifier of an Airport Terminal.\",\"isNullable\":false,\"name\":\"AirportTerminalId\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"AirportTerminal.cdm.json/AirportTerminal\",\"name\":\"AirportTerminalName\"},\"dataType\":\"string\",\"dataTypeLength\":256,\"description\":\"The business name by which the Airport Terminal is known.\\n\\nEx:  \\\"JFK Terminal #2\\\"\",\"isNullable\":true,\"name\":\"AirportTerminalName\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"AirportTerminal.cdm.json/AirportTerminal\",\"name\":\"AirportId\"},\"dataType\":\"integer\",\"description\":\"The unique identifier of an Airport.\",\"isNullable\":true,\"name\":\"AirportId\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"AirportTerminal.cdm.json/AirportTerminal\",\"name\":\"LocationGpsLongitudePosition\"},\"dataType\":\"decimal\",\"dataTypeLength\":10,\"description\":\"The location GPS position expressed in longitude.\\n\\nEx:\\n\\nGPS Coordinates (Ex= 39deg 58.589min) - seconds are converted to decimal format.\",\"isNullable\":false,\"scale\":7,\"name\":\"LocationGpsLongitudePosition\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"AirportTerminal.cdm.json/AirportTerminal\",\"name\":\"LocationGpsLatitudePosition\"},\"dataType\":\"decimal\",\"dataTypeLength\":10,\"description\":\"The location GPS position expressed in latitude.\\n\\nEx:\\n\\nGPS Coordinates (Ex= 39deg 58.589min) - seconds are converted to decimal format.\",\"isNullable\":false,\"scale\":7,\"name\":\"LocationGpsLatitudePosition\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"AirportTerminal.cdm.json/AirportTerminal\",\"name\":\"SecurityLevelId\"},\"dataType\":\"integer\",\"description\":\"The unique identifier of the Security Level.\",\"isNullable\":true,\"name\":\"SecurityLevelId\"},{\"type\":\"Existing\",\"attributeReference\":{\"entity\":\"AirportTerminal.cdm.json/AirportTerminal\",\"name\":\"AirportTerminalConfigurationTypeId\"},\"dataType\":\"integer\",\"description\":\"The unique identifier of the Airport Terminal Configuration Type.\",\"isNullable\":true,\"name\":\"AirportTerminalConfigurationTypeId\"}]}}}",
+			"Description": "A building at an airport where passengers transfer between different forms of transportation and the facilities that allow them to board and disembark from aircraft.",
+			"DisplayFolderInfo": "{\"name\":\"Airlines\",\"colorCode\":\"#00188F\"}",
+			"PrimaryKeys": "AirportTerminalId",
+			"spark.sql.sources.provider": "csv",
+			"spark.sql.sources.schema.numParts": "1",
+			"spark.sql.sources.schema.part.0": "{\"type\":\"struct\",\"fields\":[{\"name\":\"AirportTerminalId\",\"type\":\"integer\",\"nullable\":false,\"metadata\":{}},{\"name\":\"AirportTerminalName\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"AirportId\",\"type\":\"integer\",\"nullable\":true,\"metadata\":{}},{\"name\":\"LocationGpsLongitudePosition\",\"type\":\"decimal(10,7)\",\"nullable\":false,\"metadata\":{}},{\"name\":\"LocationGpsLatitudePosition\",\"type\":\"decimal(10,7)\",\"nullable\":false,\"metadata\":{}},{\"name\":\"SecurityLevelId\",\"type\":\"integer\",\"nullable\":true,\"metadata\":{}},{\"name\":\"AirportTerminalConfigurationTypeId\",\"type\":\"integer\",\"nullable\":true,\"metadata\":{}}]}"
+		},
+		"ObjectVersion": 1,
+		"ObjectId": "e90928d0-433c-4e79-8527-aada1a2d41f6",
+		"Description": "A building at an airport where passengers transfer between different forms of transportation and the facilities that allow them to board and disembark from aircraft."
+	},
+	"type": "TABLE"
+}

@@ -1,0 +1,641 @@
+{
+	"name": "PythonNotes",
+	"properties": {
+		"folder": {
+			"name": "Spark - Lake Database/Python"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "TestSparkPool",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "4397dd99-7579-4633-8fd0-d32721342189"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/53b2e7eb-9e0b-45c0-8fa3-b6279c1b186e/resourceGroups/msdnCertification/providers/Microsoft.Synapse/workspaces/msdncertsynapsewrkspace/bigDataPools/TestSparkPool",
+				"name": "TestSparkPool",
+				"type": "Spark",
+				"endpoint": "https://msdncertsynapsewrkspace.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/TestSparkPool",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.3",
+				"nodeCount": 3,
+				"cores": 4,
+				"memory": 28,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "python"
+					}
+				},
+				"source": [
+					"\r\n",
+					"%%pyspark\r\n",
+					"df = spark.read.load('abfss://adfcookbook@adlsgen2msdncert.dfs.core.windows.net/airlines.csv',\r\n",
+					"    format='csv',\r\n",
+					"    header=True\r\n",
+					")\r\n",
+					"display(df.limit(10))\r\n",
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"flightDF = spark.read.format('csv').options(\r\n",
+					"    header='true').load(\"abfss://adfcookbook@adlsgen2msdncert.dfs.core.windows.net/airlines.csv\")\r\n",
+					"display(flightDF.limit(10))"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# specify a schema for the dataframe to be loaded from a file\r\n",
+					"from pyspark.sql.types import *\r\n",
+					"from pyspark.sql.functions import *\r\n",
+					"\r\n",
+					"productSchema = StructType([\r\n",
+					"    StructField(\"ProductID\", IntegerType()),\r\n",
+					"    StructField(\"ProductName\", StringType()),\r\n",
+					"    StructField(\"Category\", StringType()),\r\n",
+					"    StructField(\"ListPrice\", FloatType())\r\n",
+					"    ])\r\n",
+					"\r\n",
+					"df = spark.read.load('abfss://adfcookbook@adlsgen2msdncert.dfs.core.windows.net/SalesOrders.csv',\r\n",
+					"    format='csv',\r\n",
+					"    schema=productSchema,\r\n",
+					"    header=False)\r\n",
+					"display(df.limit(10))"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"bikes_df = df.select(\"ProductName\", \"ListPrice\").where((df[\"Category\"]==\"Mountain Bikes\") | (df[\"Category\"]==\"Road Bikes\"))\r\n",
+					"display(bikes_df)"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"counts_df = df.select(\"ProductID\", \"Category\").groupBy(\"Category\").count()\r\n",
+					"display(counts_df)\r\n",
+					""
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"\r\n",
+					"# create a data frame to read data.\r\n",
+					"\r\n",
+					"flightDF = spark.read.format('csv').options(\r\n",
+					"    header='true', inferschema='true').load(\"/mnt/flightdata/*.csv\")\r\n",
+					"\r\n",
+					"# read the airline csv file and write the output to parquet format for easy query.\r\n",
+					"flightDF.write.mode(\"append\").parquet(\"/mnt/flightdata/parquet/flights\")\r\n",
+					"print(\"Done\")"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# get a list of CSV files\r\n",
+					"\r\n",
+					"import os.path\r\n",
+					"import IPython\r\n",
+					"from pyspark.sql import SQLContext\r\n",
+					"display(dbutils.fs.ls(\"/mnt/flightdata\"))\r\n",
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# create a new file and list files in the parquet/flights folder\r\n",
+					"\r\n",
+					"dbutils.fs.put(\"/mnt/flightdata/1.txt\", \"Hello, World!\", True)\r\n",
+					"dbutils.fs.ls(\"/mnt/flightdata/parquet/flights\")"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"acDF = spark.read.format('csv').options(\r\n",
+					"    header='true', inferschema='true').load(\"/mnt/flightdata/On_Time.csv\")\r\n",
+					"acDF.write.parquet('/mnt/flightdata/parquet/airlinecodes')\r\n",
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# read the existing parquet file for the flights database that was created earlier\r\n",
+					"flightDF = spark.read.format('parquet').options(\r\n",
+					"    header='true', inferschema='true').load(\"/mnt/flightdata/parquet/flights\")\r\n",
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# print the schema of the dataframes\r\n",
+					"acDF.printSchema()\r\n",
+					"\r\n",
+					"# read the existing parquet file for the flights database that was created earlier\r\n",
+					"flightDF = spark.read.format('parquet').options(\r\n",
+					"    header='true', inferschema='true').load(\"/mnt/flightdata/parquet/flights\")\r\n",
+					"\r\n",
+					"flightDF.printSchema()"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# print the flight database size\r\n",
+					"print(\"Number of flights in the database: \", flightDF.count())\r\n",
+					"\r\n",
+					"# show the first 20 rows (20 is the default)\r\n",
+					"# to show the first n rows, run: df.show(n)\r\n",
+					"acDF.show(100, False)\r\n",
+					"flightDF.show(20, False)"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Display to run visualizations\r\n",
+					"# preferably run this in a separate cmd cell\r\n",
+					"display(flightDF)"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# create a temporary sql view for querying flight information\r\n",
+					"FlightTable = spark.read.parquet('/mnt/flightdata/parquet/flights')\r\n",
+					"FlightTable.createOrReplaceTempView('FlightTable')\r\n",
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"\r\n",
+					"# create a temporary sql view for querying airline code information\r\n",
+					"AirlineCodes = spark.read.parquet('/mnt/flightdata/parquet/airlinecodes')\r\n",
+					"AirlineCodes.createOrReplaceTempView('AirlineCodes')"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"\r\n",
+					"# using spark sql, query the parquet file to return total flights in January and February 2016\r\n",
+					"out1 = spark.sql(\"SELECT * FROM FlightTable WHERE Month=1 and Year= 2016\")\r\n",
+					"NumJan2016Flights = out1.count()\r\n",
+					"out2 = spark.sql(\"SELECT * FROM FlightTable WHERE Month=2 and Year= 2016\")\r\n",
+					"NumFeb2016Flights = out2.count()\r\n",
+					"print(\"Jan 2016: \", NumJan2016Flights, \" Feb 2016: \", NumFeb2016Flights)\r\n",
+					"Total = NumJan2016Flights+NumFeb2016Flights\r\n",
+					"print(\"Total flights combined: \", Total)"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# List out all the airports in Texas\r\n",
+					"\r\n",
+					"out = spark.sql(\r\n",
+					"    \"SELECT distinct(OriginCityName) FROM FlightTable where OriginStateName = 'Texas'\")\r\n",
+					"print('Airports in Texas: ', out.show(100))\r\n",
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"\r\n",
+					"# find all airlines that fly from Texas\r\n",
+					"out1 = spark.sql(\r\n",
+					"    \"SELECT distinct(Reporting_Airline) FROM FlightTable WHERE OriginStateName='Texas'\")\r\n",
+					"print('Airlines that fly to/from Texas: ', out1.show(100, False))"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"## Using SQL expressions in Spark\r\n",
+					"The Dataframe API is part of a Spark library named Spark SQL, which enables data analysts to use SQL expressions to query and manipulate data.\r\n",
+					"\r\n",
+					"#### Creating database objects in the Spark catalog\r\n",
+					"The Spark catalog is a metastore for relational data objects such as views and tables. The Spark runtime can use the catalog to seamlessly integrate code written in any Spark-supported language with SQL expressions that may be more natural to some data analysts or developers.\r\n",
+					"\r\n",
+					"One of the simplest ways to make data in a dataframe available for querying in the Spark catalog is to create a temporary view, as shown in the following code example:"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df.createOrReplaceTempView(\"products\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"A view is temporary, meaning that it's automatically deleted at the end of the current session. You can also create tables that are persisted in the catalog to define a database that can be queried using Spark SQL.\r\n",
+					"\r\n",
+					" Note\r\n",
+					"We won't explore Spark catalog tables in depth in this module, but it's worth taking the time to highlight a few key points:\r\n",
+					"\r\n",
+					"You can create an empty table by using the spark.catalog.createTable method. Tables are metadata structures that store their underlying data in the storage location associated with the catalog. Deleting a table also deletes its underlying data.\r\n",
+					"\r\n",
+					"You can save a dataframe as a table by using its saveAsTable method.\r\n",
+					"\r\n",
+					"You can create an external table by using the spark.catalog.createExternalTable method. External tables define metadata in the catalog but get their underlying data from an external storage location; typically a folder in a data lake. Deleting an external table does not delete the underlying data."
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#### Using the Spark SQL API to query data\r\n",
+					"You can use the Spark SQL API in code written in any language to query data in the catalog. For example, the following PySpark code uses a SQL query to return data from the products view as a dataframe."
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"bikes_df = spark.sql(\"SELECT ProductID, ProductName, ListPrice \\\r\n",
+					"                      FROM products \\\r\n",
+					"                      WHERE Category IN ('Mountain Bikes', 'Road Bikes')\")\r\n",
+					"display(bikes_df)"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#### Using SQL code\r\n",
+					"The previous example demonstrated how to use the Spark SQL API to embed SQL expressions in Spark code. In a notebook, you can also use the %%sql magic to run SQL code that queries objects in the catalog, like this:"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					}
+				},
+				"source": [
+					"%%sql\r\n",
+					"\r\n",
+					"SELECT Category, COUNT(ProductID) AS ProductCount\r\n",
+					"FROM products\r\n",
+					"GROUP BY Category\r\n",
+					"ORDER BY Category"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"## Delta Lake\r\n",
+					"We’ll create a Delta Lake structure using Spark SQL in a Notebook connected to a Spark Pool in the following code and then test creating a View and also an External Table over this data in Serverless SQL Pools.\r\n",
+					"\r\n",
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					}
+				},
+				"source": [
+					"%%sql\r\n",
+					"\r\n",
+					"CREATE TABLE delta_salesorder\r\n",
+					"USING delta\r\n",
+					"PARTITIONED BY (OrderDatePartition)\r\n",
+					"LOCATION 'abfss://container@storage.dfs.core.windows.net/spark/deltalake/salesorder'\r\n",
+					"AS SELECT OrderID,\r\n",
+					"          CustomerID,\r\n",
+					"          SalespersonPersonID,\r\n",
+					"          PickedByPersonID,\r\n",
+					"          ContactPersonID,\r\n",
+					"          BackorderOrderID,\r\n",
+					"          CAST(OrderDate AS DATE) AS OrderDatePartition,\r\n",
+					"          CAST(OrderDate AS DATE) AS OrderDate\r\n",
+					"FROM raw_salesorder"
+				]
+			}
+		]
+	}
+}

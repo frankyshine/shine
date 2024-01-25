@@ -1,0 +1,20 @@
+{
+	"name": "External Tables",
+	"properties": {
+		"folder": {
+			"name": "Synapse SQL/Serverless SQL Pools"
+		},
+		"content": {
+			"query": "/*\nExternal Tables\n****************************\n****************************\n\nWe now turn our attention to External Tables. Like Views, External Tables allow us to query source data however there are a few\n limitations in that we must create DATA_SOURCE and FILE_FORMAT objects, we are unable to partition prune using the filepath()\n  function, and we must explicitly define the column names and data types.\n\nWith regards to partition pruning, we do note in the Microsoft documentation that External Tables only support partition \npruning (folder partition elimination) when created via Spark pools and used in Serverless SQL Pools queries \n(we will look at this later in this blog post).\n\n\nFeatures and Functionality\n----------------------------\n . Create a query-able table in a Serverless SQL Pools database to abstract the connection to the data source\n . Must define the column names and data types (schema information) at view creation time\n . Cannot use the filepath() function to partition prune, any WHERE filtering is done over the whole source data\n\n\nUseful Scenarios\n---------------------------\n . Connecting to source data when partition pruning is not required\n . Where source data can accept filter pushdown such as Parquet to mitigate no partition pruning\n . Smaller datasets such as reference data or dimensions\n . Write the results of a SELECT statement back to Azure Storage using CETAS\n\n\n\nExample Syntax\n----------------\nLet’s look at an example of creating an External Table. We need to create an addition object for the FILE_FORMAT option.\n*/\n\n\nCREATE EXTERNAL FILE FORMAT CsvWithHeaderFormat\nWITH (  \n        FORMAT_TYPE = DELIMITEDTEXT,    \n        FORMAT_OPTIONS ( \n                            PARSER_VERSION = '2.0',\n                            FIELD_TERMINATOR = '|', \n                            FIRST_ROW = 2,\n                            USE_TYPE_DEFAULT = FALSE,\n                            STRING_DELIMITER = '\"')\n);\n\n\nCREATE EXTERNAL TABLE LDW.BlogSalesOrders\n(\n    OrderID INT,\n    CustomerID INT,\n    SalespersonPersonID INT,\n    PickedByPersonID INT,\n    ContactPersonID INT,\n    BackorderOrderID INT,\n    OrderDate DATE,\n    ExpectedDeliveryDate DATE,\n    CustomerPurchaseOrderNumber INT,\n    IsUndersupplyBackordered BIT,\n    PickingCompletedWhen DATE,\n    LastEditedBy INT,\n    LastEditedWhen DATE\n)  \nWITH (\n    LOCATION = 'sourcedata/salesorder/**',\n    DATA_SOURCE = ExternalDataSourceDataLake,  \n    FILE_FORMAT = CsvWithHeaderFormat    \n)\n\n\n/*\nCREATE EXTERNAL TABLE AS SELECT\n------------------------------\nExternal Tables can also be used to load/save the results of a SELECT statement to Azure Storage by using the CREATE EXTERNAL\nTABLE AS SELECT syntax. This is particularly useful if you with to transform source data and store as another file format \n such as Parquet. There are limitations in that we are unable to define a destination partition scheme nor control how many \n rows per file are created or the number of files, this is all done automatically.\n\nExample Syntax\nWe’ll now create an External Tables with the results of a SELECT statement from a View. We will create a Parquet file \nformat to use in the WITH options.\n*/\n\n    CREATE EXTERNAL FILE FORMAT SynapseParquetFormat\n    WITH ( \n            FORMAT_TYPE = PARQUET\n        );\n\n    CREATE EXTERNAL TABLE LDW.AggregateSalesData\n    WITH (\n        LOCATION = 'destinationdata/salesorderaggregates/',\n        DATA_SOURCE = ExternalDataSourceDataLake,  \n        FILE_FORMAT = SynapseParquetFormat\n    )\n    AS\n    SELECT...\n\n\n\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

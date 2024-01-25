@@ -1,0 +1,133 @@
+{
+	"name": "list_synapse_files_recursively",
+	"properties": {
+		"folder": {
+			"name": "1. Utilities"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "TestSparkPool",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "562382f8-63fe-4978-a589-eba9d102fbec"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "python"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/53b2e7eb-9e0b-45c0-8fa3-b6279c1b186e/resourceGroups/msdnCertification/providers/Microsoft.Synapse/workspaces/msdncertsynapsewrkspace/bigDataPools/TestSparkPool",
+				"name": "TestSparkPool",
+				"type": "Spark",
+				"endpoint": "https://msdncertsynapsewrkspace.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/TestSparkPool",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.3",
+				"nodeCount": 3,
+				"cores": 4,
+				"memory": 28,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"def deep_ls(path: str, max_depth=1):\r\n",
+					"    \"\"\"\r\n",
+					"    List all files and folders in specified path and\r\n",
+					"    subfolders within maximum recursion depth.\r\n",
+					"    \"\"\"\r\n",
+					"\r\n",
+					"    # List all files in path and apply sorting rules\r\n",
+					"    li = mssparkutils.fs.ls(path)\r\n",
+					"\r\n",
+					"    # Return all files\r\n",
+					"    for x in li:\r\n",
+					"        if x.size != 0:\r\n",
+					"            yield x\r\n",
+					"\r\n",
+					"    # If the max_depth has not been reached, start\r\n",
+					"    # listing files and folders in subdirectories\r\n",
+					"    if max_depth > 1:\r\n",
+					"        for x in li:\r\n",
+					"            if x.size != 0:\r\n",
+					"                continue\r\n",
+					"            for y in deep_ls(x.path, max_depth - 1):\r\n",
+					"                yield y\r\n",
+					"\r\n",
+					"    # If max_depth has been reached,\r\n",
+					"    # return the folders\r\n",
+					"    else:\r\n",
+					"        for x in li:\r\n",
+					"            if x.size == 0:\r\n",
+					"                yield x\r\n",
+					"                \r\n",
+					"def convertfiles2df(files):\r\n",
+					"    \"\"\"\r\n",
+					"    Converts FileInfo object into Pandas DataFrame to enable display\r\n",
+					"    \"\"\"\r\n",
+					"    # Disable Arrow-based transfers since the Pandas DataFrame is tiny\r\n",
+					"    spark.conf.set(\"spark.sql.execution.arrow.enabled\", \"false\")\r\n",
+					"\r\n",
+					"    schema = ['path','name','size']\r\n",
+					"    df = pd.DataFrame([[getattr(i,j) for j in schema] for i in files], columns = schema).sort_values('path')\r\n",
+					"    return(df)\r\n",
+					" \r\n",
+					" \r\n",
+					"# Example Implementation\r\n",
+					"# ----------------------\r\n",
+					"import pandas as pd\r\n",
+					"from notebookutils import mssparkutils\r\n",
+					"\r\n",
+					"# Azure storage access info\r\n",
+					"adls_account_name = 'your-account-name'\r\n",
+					"adls_container_name = 'your-container-name'\r\n",
+					"linked_service_name = 'adls-linked-service-name-in-synapse'\r\n",
+					"\r\n",
+					"# Grab SAS token\r\n",
+					"adls_sas_token = mssparkutils.credentials.getConnectionStringOrCreds(linked_service_name)\r\n",
+					"\r\n",
+					"# Configure Spark to access from DFS endpoint\r\n",
+					"root = 'abfss://%s@%s.dfs.core.windows.net/' % (adls_container_name, adls_account_name)\r\n",
+					"spark.conf.set('fs.azure.sas.%s.%s.dfs.core.windows.net' % (adls_container_name, adls_account_name), adls_sas_token)\r\n",
+					"\r\n",
+					"# Get files\r\n",
+					"files = list(deep_ls(root, max_depth=20))\r\n",
+					"\r\n",
+					"# Display with Pretty Printing\r\n",
+					"display(convertfiles2df(files))\r\n",
+					"\r\n",
+					"# Pretty Printing works with default ls as well\r\n",
+					"display(convertfiles2df(mssparkutils.fs.ls(root)))"
+				]
+			}
+		]
+	}
+}

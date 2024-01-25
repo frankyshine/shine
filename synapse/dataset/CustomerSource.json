@@ -1,0 +1,17 @@
+{
+	"name": "CustomerSource",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "msdncertsynapsewrkspace-WorkspaceDefaultSqlServer",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlDWTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "CustomerSource"
+		}
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}

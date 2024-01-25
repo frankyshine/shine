@@ -1,0 +1,54 @@
+{
+	"name": "Dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          Category as string,",
+				"          Subcategory as string,",
+				"          Model as string,",
+				"          ListPrice as decimal(18,2),",
+				"          Color as string,",
+				"          StandardCost as decimal(18,2),",
+				"          Product as string,",
+				"          sku as string,",
+				"          ProductKey as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     store: 'synapse',",
+				"     databaseType: 'spark',",
+				"     format: 'table',",
+				"     database: 'AdventureWorksDW',",
+				"     tableName: 'ProductData') ~> source1",
+				"source1 derive(Newhash = sha2(256, iifNull(Category,''))) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     store: 'synapse',",
+				"     databaseType: 'spark',",
+				"     format: 'table',",
+				"     database: 'Database2',",
+				"     tableName: 'Table_1',",
+				"     mapColumn(",
+				"          hashkey = Newhash",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}

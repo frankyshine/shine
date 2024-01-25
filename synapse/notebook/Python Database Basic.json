@@ -1,0 +1,284 @@
+{
+	"name": "Python Database Basic",
+	"properties": {
+		"folder": {
+			"name": "Spark - Lake Database/Python"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "TestSparkPool",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "00a4446a-c299-4904-98d1-11a3dc7ca26c"
+			}
+		},
+		"metadata": {
+			"saveOutput": false,
+			"enableDebugMode": true,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/53b2e7eb-9e0b-45c0-8fa3-b6279c1b186e/resourceGroups/msdnCertification/providers/Microsoft.Synapse/workspaces/msdncertsynapsewrkspace/bigDataPools/TestSparkPool",
+				"name": "TestSparkPool",
+				"type": "Spark",
+				"endpoint": "https://msdncertsynapsewrkspace.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/TestSparkPool",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.3",
+				"nodeCount": 3,
+				"cores": 4,
+				"memory": 28,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"\r\n",
+					"spark.sql(\"CREATE DATABASE SprkSQLDB_NYTaxi\")\r\n",
+					""
+				],
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"spark.catalog.listDatabases()"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"spark.catalog.listTables(\"default\")"
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"spark.sql(\"USE DATABASE SprkSQLDB_NYTaxi\")\r\n",
+					"\r\n",
+					"spark.sql(''' CREATE TABLE managed_test_tbl ( date STRING, delay INT,  \r\n",
+					"distance INT, origin STRING, destination STRING) ''')"
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"park.sql(\"USE DATABASE Database1\")\r\n",
+					"\r\n",
+					"spark.sql(''' CREATE TABLE managed_test_tbl ( date STRING, delay INT,  \r\n",
+					"distance INT, origin STRING, destination STRING) ''')"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "python"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%%pyspark\r\n",
+					"df = spark.read.load('abfss://adfcookbook@adlsgen2msdncert.dfs.core.windows.net/input/airlines.csv',\r\n",
+					"    format='csv',\r\n",
+					"    header=True\r\n",
+					")\r\n",
+					"display(df.limit(10))\r\n",
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"spark.sql(\"USE DATABASE SprkSQLDB_NYTaxi\")\r\n",
+					"\r\n",
+					"# Schema as defined in the preceding example\r\n",
+					"schema=\"ID INT, Name STRING,Code STRING, Country STRING\"\r\n",
+					"df.write.saveAsTable(\"managed_test2_tbl\")"
+				],
+				"execution_count": 8
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"spark.sql(\"USE DATABASE Database1\")\r\n",
+					"\r\n",
+					"# Schema as defined in the preceding example\r\n",
+					"schema=\"ID INT, Name STRING,Code STRING, Country STRING\"\r\n",
+					"df.write.saveAsTable(\"managed_test2_tbl\")"
+				],
+				"execution_count": 9
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Creating unmanaged tables\r\n",
+					"spark.sql(\"USE DATABASE SprkSQLDB_NYTaxi\")\r\n",
+					"\r\n",
+					"spark.sql(\"\"\"CREATE TABLE UnmanagedTest1_tbl(ID INT, Name STRING,Code STRING, Country STRING ) \r\n",
+					"USING csv \r\n",
+					"OPTIONS (PATH \r\n",
+					"'abfss://adfcookbook@adlsgen2msdncert.dfs.core.windows.net/input/airlines.csv')\"\"\")\r\n",
+					""
+				],
+				"execution_count": 10
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# And within the DataFrame API use:\r\n",
+					"spark.sql(\"USE DATABASE SprkSQLDB_NYTaxi\")\r\n",
+					"\r\n",
+					"(df\r\n",
+					".write\r\n",
+					".option(\"path\", \"abfss://adfcookbook@adlsgen2msdncert.dfs.core.windows.net/input/airlines.csv\")\r\n",
+					".saveAsTable(\"UnmanagedTest2_tbl\"))"
+				],
+				"execution_count": 11
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# list all tables in spark catalog. ie those in hive metadata (warehouse) \r\n",
+					"# and those in the synape shared metastore\r\n",
+					"\r\n",
+					"spark.catalog.listTables()"
+				],
+				"execution_count": 13
+			}
+		]
+	}
+}

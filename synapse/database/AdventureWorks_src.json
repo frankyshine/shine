@@ -1,0 +1,26 @@
+{
+	"name": "AdventureWorks_src",
+	"properties": {
+		"Name": "AdventureWorks_src",
+		"EntityType": "DATABASE",
+		"Origin": {
+			"Type": "SPARK"
+		},
+		"Properties": {
+			"IsSyMSCDMDatabase": true,
+			"DerivedModelDBInfo": "{\"ModelDirectives\":{\"BaseModel\":{\"Name\":\"Retail\",\"Version\":\"1.3.0\"}}}"
+		},
+		"Source": {
+			"Provider": "ADLS",
+			"Location": "abfss://adlsflsys@adlsgen2msdncert.dfs.core.windows.net/AdventureWorks_src",
+			"Properties": {
+				"FormatType": "csv",
+				"LinkedServiceName": "msdncertsynapsewrkspace-WorkspaceDefaultStorage"
+			}
+		},
+		"PublishStatus": "PUBLISHED",
+		"ObjectVersion": 12,
+		"ObjectId": "f13ce9ce-593d-4daf-8c2c-55533ca84be3"
+	},
+	"type": "DATABASE"
+}

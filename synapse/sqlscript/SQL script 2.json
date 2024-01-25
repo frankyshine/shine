@@ -1,0 +1,20 @@
+{
+	"name": "SQL script 2",
+	"properties": {
+		"folder": {
+			"name": "Synapse SQL/Serverless SQL Pools"
+		},
+		"content": {
+			"query": "--Date\nCREATE EXTERNAL TABLE LDW.DimDate\nWITH \n(\n  LOCATION = 'conformed/dimensions/dimdate',\n  DATA_SOURCE = ExternalDataSourceDataLake,\n  FILE_FORMAT = SynapseParquetFormat\n) \nAS\nSELECT CAST(DateKey AS INT) AS DateKey,\n        CAST(Date AS DATE) AS Date,\n        CAST(Day AS TINYINT) AS Day,\n        CAST(WeekDay AS TINYINT) AS WeekDay,\n        WeekDayName,\n        CAST(Month AS TINYINT) AS Month,\n        MonthName,\n        CAST(Quarter AS TINYINT) AS Quarter,\n        CAST(Year AS SMALLINT) AS Year\nFROM\nOPENROWSET \n(\n    BULK 'sourcedatadim/datedim/*.csv',\n    DATA_SOURCE = 'ExternalDataSourceDataLake',\n    FORMAT = 'CSV',\n    PARSER_VERSION = '2.0',\n    HEADER_ROW = TRUE,\n    FIELDTERMINATOR ='|'\n) AS fct ;\n\n GO",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "sqlSrvlesslogicaldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

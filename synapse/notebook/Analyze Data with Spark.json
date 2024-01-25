@@ -1,0 +1,378 @@
+{
+	"name": "Analyze Data with Spark",
+	"properties": {
+		"folder": {
+			"name": "Spark - Lake Database/Python"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "TestSparkPool",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 1,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "true",
+				"spark.dynamicAllocation.minExecutors": "1",
+				"spark.dynamicAllocation.maxExecutors": "4",
+				"spark.autotune.trackingId": "2c39c3b7-e6ff-4e55-a455-406cdb8e70ae"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "python"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/53b2e7eb-9e0b-45c0-8fa3-b6279c1b186e/resourceGroups/msdnCertification/providers/Microsoft.Synapse/workspaces/msdncertsynapsewrkspace/bigDataPools/TestSparkPool",
+				"name": "TestSparkPool",
+				"type": "Spark",
+				"endpoint": "https://msdncertsynapsewrkspace.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/TestSparkPool",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.3",
+				"nodeCount": 3,
+				"cores": 4,
+				"memory": 28,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#### Perform exploratory data analysis by using Azure Open Datasets and Apache Spark.\r\n",
+					"\r\n",
+					"https://learn.microsoft.com/en-us/azure/synapse-analytics/spark/apache-spark-data-visualization-tutorial"
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"import matplotlib.pyplot as plt\r\n",
+					"import seaborn as sns\r\n",
+					"import pandas as pd\r\n",
+					"\r\n",
+					"from azureml.opendatasets import NycTlcYellow\r\n",
+					"from datetime import datetime\r\n",
+					"from dateutil import parser\r\n",
+					""
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"Note: Because of the PySpark kernel, you don't need to create any contexts explicitly. The Spark context is automatically created for you when you run the first code cell"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# use python dateutil parser.parse() function takes the date string as input and returns a datetime object\r\n",
+					"end_date = parser.parse('2018-06-06')\r\n",
+					"start_date = parser.parse('2018-05-01')\r\n",
+					"\r\n",
+					"# raw data is in a Parquet format, you can use the Spark context to pull the file into memory as a DataFrame directly\r\n",
+					"nyc_tlc = NycTlcYellow(start_date=start_date, end_date=end_date)\r\n",
+					"df = nyc_tlc.to_spark_dataframe()"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Filter the dataset \r\n",
+					"from pyspark.sql.functions import *\r\n",
+					"\r\n",
+					"filtered_df = df.select('vendorID', 'passengerCount', 'tripDistance','paymentType', 'fareAmount', 'tipAmount'\\\r\n",
+					"                                , date_format('tpepPickupDateTime', 'hh').alias('hour_of_day')\\\r\n",
+					"                                , dayofweek('tpepPickupDateTime').alias('day_of_week')\\\r\n",
+					"                                , dayofmonth(col('tpepPickupDateTime')).alias('day_of_month'))\\\r\n",
+					"                            .filter((df.passengerCount > 0)\\\r\n",
+					"                                & (df.tipAmount >= 0)\\\r\n",
+					"                                & (df.fareAmount >= 1) & (df.fareAmount <= 250)\\\r\n",
+					"                                & (df.tripDistance > 0) & (df.tripDistance <= 200))\r\n",
+					"\r\n",
+					"filtered_df.createOrReplaceTempView(\"taxi_dataset\")"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					}
+				},
+				"source": [
+					"%%sql\r\n",
+					"SELECT \r\n",
+					"    day_of_month\r\n",
+					"    , MIN(tipAmount) AS minTipAmount\r\n",
+					"    , MAX(tipAmount) AS maxTipAmount\r\n",
+					"    , AVG(tipAmount) AS avgTipAmount\r\n",
+					"    , AVG(fareAmount) as fareAmount\r\n",
+					"FROM taxi_dataset \r\n",
+					"GROUP BY day_of_month\r\n",
+					"ORDER BY day_of_month ASC"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"you can visualize the results by using the built-in chart options"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#### Visualize data\r\n",
+					"\r\n",
+					"To make development easier and less expensive, we'll downsample the dataset. We'll use the built-in Apache Spark sampling capability"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# To make development easier, faster, and less expensive, downsample for now\r\n",
+					"sampled_taxi_df = filtered_df.sample(True, 0.001, seed=1234)\r\n",
+					"\r\n",
+					"# The charting package needs a Pandas DataFrame or NumPy array to do the conversion\r\n",
+					"sampled_taxi_pd_df = sampled_taxi_df.toPandas()"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Look at a histogram of tips by count by using Matplotlib\r\n",
+					"\r\n",
+					"ax1 = sampled_taxi_pd_df['tipAmount'].plot(kind='hist', bins=25, facecolor='lightblue')\r\n",
+					"ax1.set_title('Tip amount distribution')\r\n",
+					"ax1.set_xlabel('Tip Amount ($)')\r\n",
+					"ax1.set_ylabel('Counts')\r\n",
+					"plt.suptitle('')\r\n",
+					"plt.show()"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					" Based on the distribution, we can see that tips are skewed toward amounts less than or equal to $10."
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"Next, we want to understand the relationship between the tips for a given trip and the day of the week. Use Seaborn to create a box plot that summarizes the trends for each day of the week."
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# View the distribution of tips by day of week using Seaborn\r\n",
+					"ax = sns.boxplot(x=\"day_of_week\", y=\"tipAmount\",data=sampled_taxi_pd_df, showfliers = False)\r\n",
+					"ax.set_title('Tip amount distribution per day')\r\n",
+					"ax.set_xlabel('Day of Week')\r\n",
+					"ax.set_ylabel('Tip Amount ($)')\r\n",
+					"plt.show()"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"Another hypothesis of ours might be that there's a positive relationship between the number of passengers and the total taxi tip amount. To verify this relationship, run the following code to generate a box plot that illustrates the distribution of tips for each passenger count."
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# How many passengers tipped by various amounts \r\n",
+					"ax2 = sampled_taxi_pd_df.boxplot(column=['tipAmount'], by=['passengerCount'])\r\n",
+					"ax2.set_title('Tip amount by Passenger count')\r\n",
+					"ax2.set_xlabel('Passenger count')\r\n",
+					"ax2.set_ylabel('Tip Amount ($)')\r\n",
+					"ax2.set_ylim(0,30)\r\n",
+					"plt.suptitle('')\r\n",
+					"plt.show()"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"Last, we want to understand the relationship between the fare amount and the tip amount. Based on the results, we can see that there are several observations where people don't tip. However, we also see a positive relationship between the overall fare and tip amounts."
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Look at the relationship between fare and tip amounts\r\n",
+					"ax = sampled_taxi_pd_df.plot(kind='scatter', x= 'fareAmount', y = 'tipAmount', c='blue', alpha = 0.10, s=2.5*(sampled_taxi_pd_df['passengerCount']))\r\n",
+					"ax.set_title('Tip amount by Fare amount')\r\n",
+					"ax.set_xlabel('Fare Amount ($)')\r\n",
+					"ax.set_ylabel('Tip Amount ($)')\r\n",
+					"plt.axis([-2, 80, -2, 20])\r\n",
+					"plt.suptitle('')\r\n",
+					"plt.show()"
+				]
+			}
+		]
+	}
+}

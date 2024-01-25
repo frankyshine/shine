@@ -1,0 +1,20 @@
+{
+	"name": "CETAS - Store Query Result as Table",
+	"properties": {
+		"folder": {
+			"name": "Synapse SQL/Serverless SQL Pools"
+		},
+		"content": {
+			"query": "\nhttps://learn.microsoft.com/en-us/azure/synapse-analytics/sql/create-external-table-as-select\n\n\n/*\nStore query results to storage using serverless SQL pool in Azure Synapse Analytics\n************************************************************************************\n\nIn this article, you'll learn how to store query results to storage using serverless SQL pool.\n\nPrerequisites\nYour first step is to create a database where you will execute the queries. Then initialize the objects by \nexecuting setup script on that database. This setup script will create the data sources, database scoped credentials, \nand external file formats that are used to read data in these samples.\n\nFollow the instructions in this article to create data sources, database scoped credentials, and external file formats \nthat are used to write data into the output storage.\n\n\nCreate external table as select\n-------------------------------\nYou can use the CREATE EXTERNAL TABLE AS SELECT (CETAS) statement to store the query results to storage.\n\n*** Note:\nChange the first line in the query, i.e., [mydbname], so you're using the database you created.\n*/\n\n\nUSE [mydbname];\nGO\n\nCREATE DATABASE SCOPED CREDENTIAL [SasTokenWrite]\nWITH IDENTITY = 'SHARED ACCESS SIGNATURE',\n     SECRET = 'sv=2018-03-28&ss=bfqt&srt=sco&sp=rwdlacup&se=2019-04-18T20:42:12Z&st=2019-04-18T12:42:12Z&spr=https&sig=lQHczNvrk1KoYLCpFdSsMANd0ef9BrIPBNJ3VYEIq78%3D';\nGO\n\nCREATE EXTERNAL DATA SOURCE [MyDataSource] \nWITH (\n    LOCATION = 'https://<storage account name>.blob.core.windows.net/csv', CREDENTIAL = [SasTokenWrite]\n);\nGO\n\nCREATE EXTERNAL FILE FORMAT [ParquetFF] WITH (\n    FORMAT_TYPE = PARQUET,\n    DATA_COMPRESSION = 'org.apache.hadoop.io.compress.SnappyCodec'\n);\nGO\n\n\nCREATE EXTERNAL TABLE [dbo].[PopulationCETAS] \nWITH (\n        LOCATION = 'populationParquet/',\n        DATA_SOURCE = [MyDataSource],\n        FILE_FORMAT = [ParquetFF]\n) AS\nSELECT\n    *\nFROM\n    OPENROWSET(\n        BULK 'csv/population-unix/population.csv',\n        DATA_SOURCE = 'sqlondemanddemo',\n        FORMAT = 'CSV', PARSER_VERSION = '2.0'\n    ) WITH (\n        CountryCode varchar(4),\n        CountryName varchar(64),\n        Year int,\n        PopulationCount int\n    ) AS r;\n\n/*\n***Note\nYou must modify this script and change the target location to execute it again. External tables cannot be created\n on the location where you already have some data.\n\n\nUse the external table\n------------------------\nYou can use the external table created through CETAS like a regular external table.\n\n*/\n\nUSE [mydbname];\nGO\n\nSELECT\n    CountryName, PopulationCount\nFROM PopulationCETAS\nWHERE\n    [Year] = 2019\nORDER BY\n    [PopulationCount] DESC;\n\n/*\nRemarks\nOnce you store your results, the data in the external table cannot be modified. You cannot repeat this script because \nCETAS will not overwrite the underlying data created in the previous execution. \nVote for the following feedback items if some of these are required in your scenarios, or propose the new ones on \nAzure feedback site:\n\nEnable inserting new data into external table\nEnable deleting data from external table\nSpecify partitions in CETAS\nSpecify file sizes and counts\nThe only supported output types are Parquet and CSV. You can vote for the other types on Azure feedback site.",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "default",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

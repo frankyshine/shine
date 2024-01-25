@@ -1,0 +1,24 @@
+{
+	"name": "DestinationDataset_pes",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "msdncertsynapsewrkspace-WorkspaceDefaultStorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "countries.csv",
+				"folderPath": "input",
+				"fileSystem": "adfcookbook"
+			},
+			"compression": {
+				"type": "GZip",
+				"level": "Optimal"
+			}
+		}
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}
