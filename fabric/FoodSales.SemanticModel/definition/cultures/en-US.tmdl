@@ -2,7 +2,8 @@ cultureInfo en-US
 
 	linguisticMetadata =
 			{
-			  "DynamicImprovement": "HighConfidence",
+			  "Version": "2.0.0",
+			  "Language": "en-US",
 			  "Entities": {
 			    "order_details.revenue": {
 			      "Definition": {
@@ -15,11 +16,11 @@ cultureInfo en-US
 			      "Terms": [
 			        {
 			          "Sales Pipeline": {
-			            "Source": {
-			              "Agent": "PowerBI.VisualColumnRename",
-			              "Type": "External"
-			            },
 			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
 			            "Weight": 0.9
 			          }
 			        }
@@ -36,19 +37,17 @@ cultureInfo en-US
 			      "Terms": [
 			        {
 			          "Prodcut Name": {
-			            "Source": {
-			              "Agent": "PowerBI.VisualColumnRename",
-			              "Type": "External"
-			            },
 			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
 			            "Weight": 0.9
 			          }
 			        }
 			      ]
 			    }
-			  },
-			  "Language": "en-US",
-			  "Version": "2.0.0"
+			  }
 			}
 		contentType: json
 
